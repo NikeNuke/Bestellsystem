@@ -86,95 +86,189 @@
 
     <h1>🍽️ Restaurant</h1>
 
+    <!-- TISCH AUSWÄHLEN -->
     <div class="bereich">
+
         <h2>Tisch auswählen</h2>
 
         <select id="tisch">
-            <option value="">-- Tisch auswählen --</option>
+
+            <option value="">
+                -- Tisch auswählen --
+            </option>
+
             <option value="1">Tisch 1</option>
             <option value="2">Tisch 2</option>
             <option value="3">Tisch 3</option>
             <option value="4">Tisch 4</option>
             <option value="5">Tisch 5</option>
             <option value="6">Tisch 6</option>
+
         </select>
+
     </div>
 
+
+    <!-- SPEISEKARTE -->
     <div class="bereich">
 
         <h2>Speisekarte</h2>
 
         <div class="gericht">
-            <span>Pizza Margherita – 9,50 €</span>
-            <button class="hinzufuegen"
+
+            <span>
+                Pizza Margherita – 9,50 €
+            </span>
+
+            <button
+                class="hinzufuegen"
                 onclick="hinzufuegen('Pizza Margherita', 9.50)">
+
                 Hinzufügen
+
             </button>
+
         </div>
 
+
         <div class="gericht">
-            <span>Pizza Salami – 10,50 €</span>
-            <button class="hinzufuegen"
+
+            <span>
+                Pizza Salami – 10,50 €
+            </span>
+
+            <button
+                class="hinzufuegen"
                 onclick="hinzufuegen('Pizza Salami', 10.50)">
+
                 Hinzufügen
+
             </button>
+
         </div>
 
+
         <div class="gericht">
-            <span>Spaghetti Bolognese – 11,50 €</span>
-            <button class="hinzufuegen"
+
+            <span>
+                Spaghetti Bolognese – 11,50 €
+            </span>
+
+            <button
+                class="hinzufuegen"
                 onclick="hinzufuegen('Spaghetti Bolognese', 11.50)">
+
                 Hinzufügen
+
             </button>
+
         </div>
 
+
         <div class="gericht">
-            <span>Cola – 3,00 €</span>
-            <button class="hinzufuegen"
+
+            <span>
+                Cola – 3,00 €
+            </span>
+
+            <button
+                class="hinzufuegen"
                 onclick="hinzufuegen('Cola', 3.00)">
+
                 Hinzufügen
+
             </button>
+
         </div>
 
     </div>
 
+
+    <!-- AKTUELLE BESTELLUNG -->
     <div class="bereich">
 
         <h2>Aktuelle Bestellung</h2>
 
         <div id="aktuelleBestellung">
+
             Noch keine Artikel hinzugefügt.
+
         </div>
 
         <h3 id="gesamt">
+
             Gesamt: 0,00 €
+
         </h3>
 
-        <button class="absenden" onclick="bestellungAbsenden()">
+
+        <button
+            class="absenden"
+            onclick="bestellungAbsenden()">
+
             📤 Bestellung absenden
+
         </button>
 
     </div>
 
+
+    <!-- GESPEICHERTE BESTELLUNGEN -->
     <div class="bereich">
 
-        <h2>🗂️ Gespeicherte Bestellungen</h2>
+        <h2>
+            🗂️ Gespeicherte Bestellungen
+        </h2>
 
-        <div id="gespeicherteBestellungen"></div>
+        <div id="gespeicherteBestellungen">
+
+        </div>
 
     </div>
 
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
     <script>
+
+        // ==========================================
+        // SUPABASE VERBINDUNG
+        // ==========================================
+
+        const SUPABASE_URL =
+            "https://vnvvivgdctdesvwnxlcj.supabase.co/rest/v1/";
+
+        const SUPABASE_KEY =
+            "sb_publishable_eKTZAEO03kD6EcMR6zckgg_lJ1gBCOy";
+
+
+        const supabase =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+
+
+        // ==========================================
+        // AKTUELLE BESTELLUNG
+        // ==========================================
 
         let bestellung = [];
 
-        let bestellungen =
-            JSON.parse(localStorage.getItem("bestellungen")) || {};
+
+        // ==========================================
+        // GERICHT HINZUFÜGEN
+        // ==========================================
 
         function hinzufuegen(name, preis) {
 
             let vorhandenesGericht =
-                bestellung.find(item => item.name === name);
+                bestellung.find(
+                    item => item.name === name
+                );
+
 
             if (vorhandenesGericht) {
 
@@ -183,121 +277,206 @@
             } else {
 
                 bestellung.push({
+
                     name: name,
+
                     preis: preis,
+
                     menge: 1
+
                 });
+
             }
 
+
             anzeigen();
+
         }
 
+
+        // ==========================================
+        // MENGE ERHÖHEN
+        // ==========================================
 
         function plus(name) {
 
             let gericht =
-                bestellung.find(item => item.name === name);
+                bestellung.find(
+                    item => item.name === name
+                );
+
 
             if (gericht) {
+
                 gericht.menge++;
+
             }
 
+
             anzeigen();
+
         }
 
+
+        // ==========================================
+        // MENGE VERRINGERN
+        // ==========================================
 
         function minus(name) {
 
             let gericht =
-                bestellung.find(item => item.name === name);
+                bestellung.find(
+                    item => item.name === name
+                );
+
 
             if (!gericht) {
+
                 return;
+
             }
 
+
             gericht.menge--;
+
 
             if (gericht.menge <= 0) {
 
                 bestellung =
-                    bestellung.filter(item => item.name !== name);
+                    bestellung.filter(
+                        item => item.name !== name
+                    );
+
             }
 
+
             anzeigen();
+
         }
 
+
+        // ==========================================
+        // AKTUELLE BESTELLUNG ANZEIGEN
+        // ==========================================
 
         function anzeigen() {
 
             let bereich =
-                document.getElementById("aktuelleBestellung");
+                document.getElementById(
+                    "aktuelleBestellung"
+                );
+
 
             let gesamtElement =
-                document.getElementById("gesamt");
+                document.getElementById(
+                    "gesamt"
+                );
+
 
             if (bestellung.length === 0) {
 
                 bereich.innerHTML =
                     "Noch keine Artikel hinzugefügt.";
 
+
                 gesamtElement.innerHTML =
                     "Gesamt: 0,00 €";
 
+
                 return;
+
             }
 
+
             let html = "";
+
             let gesamtpreis = 0;
+
 
             bestellung.forEach(item => {
 
                 let artikelPreis =
                     item.preis * item.menge;
 
+
                 gesamtpreis += artikelPreis;
 
+
                 html += `
+
                     <div class="gericht">
 
                         <span>
+
                             ${item.name}
-                            – ${item.preis.toFixed(2)} €
-                            × ${item.menge}
+
+                            –
+
+                            ${item.preis.toFixed(2)}
+                            €
+
+                            ×
+
+                            ${item.menge}
+
                             =
-                            ${artikelPreis.toFixed(2)} €
+
+                            ${artikelPreis.toFixed(2)}
+                            €
+
                         </span>
+
 
                         <div>
 
                             <button
                                 class="minus"
                                 onclick="minus('${item.name}')">
+
                                 −
+
                             </button>
+
 
                             <button
                                 class="plus"
                                 onclick="plus('${item.name}')">
+
                                 +
+
                             </button>
 
                         </div>
 
                     </div>
+
                 `;
+
             });
+
 
             bereich.innerHTML = html;
 
+
             gesamtElement.innerHTML =
-                "Gesamt: " + gesamtpreis.toFixed(2) + " €";
+                "Gesamt: " +
+                gesamtpreis.toFixed(2) +
+                " €";
+
         }
 
 
-        function bestellungAbsenden() {
+        // ==========================================
+        // BESTELLUNG AN SUPABASE SENDEN
+        // ==========================================
+
+        async function bestellungAbsenden() {
 
             let tisch =
-                document.getElementById("tisch").value;
+                document.getElementById(
+                    "tisch"
+                ).value;
+
 
             if (tisch === "") {
 
@@ -306,7 +485,9 @@
                 );
 
                 return;
+
             }
+
 
             if (bestellung.length === 0) {
 
@@ -315,20 +496,52 @@
                 );
 
                 return;
+
             }
 
-            bestellungen[tisch] = {
 
-                artikel: bestellung,
+            // Jedes Gericht speichern
 
-                zeit:
-                    new Date().toLocaleTimeString("de-DE")
-            };
+            for (let item of bestellung) {
 
-            localStorage.setItem(
-                "bestellungen",
-                JSON.stringify(bestellungen)
-            );
+                const { error } =
+                    await supabase
+
+                        .from("bestellungen")
+
+                        .insert({
+
+                            tisch:
+                                Number(tisch),
+
+                            artikel:
+                                item.name,
+
+                            menge:
+                                item.menge,
+
+                            preis:
+                                item.preis
+
+                        });
+
+
+                if (error) {
+
+                    console.error(error);
+
+
+                    alert(
+                        "Fehler beim Speichern der Bestellung!"
+                    );
+
+
+                    return;
+
+                }
+
+            }
+
 
             alert(
                 "Bestellung für Tisch " +
@@ -336,83 +549,177 @@
                 " wurde gespeichert!"
             );
 
+
             bestellung = [];
+
 
             anzeigen();
 
+
             gespeicherteBestellungenAnzeigen();
+
         }
 
 
-        function gespeicherteBestellungenAnzeigen() {
+        // ==========================================
+        // BESTELLUNGEN AUS SUPABASE LADEN
+        // ==========================================
+
+        async function gespeicherteBestellungenAnzeigen() {
 
             let bereich =
                 document.getElementById(
                     "gespeicherteBestellungen"
                 );
 
-            let html = "";
 
-            for (let tisch in bestellungen) {
+            const { data, error } =
+                await supabase
 
-                let bestellung =
-                    bestellungen[tisch];
+                    .from("bestellungen")
 
-                let gesamtpreis = 0;
+                    .select("*")
 
-                html += `
-                    <div class="tisch-bestellung">
+                    .order(
+                        "erstellt_am",
+                        {
+                            ascending: false
+                        }
+                    );
 
-                        <h3>🪑 Tisch ${tisch}</h3>
 
-                        <p>
-                            Gesendet um:
-                            ${bestellung.zeit}
-                        </p>
-                `;
+            if (error) {
 
-                bestellung.artikel.forEach(item => {
+                console.error(error);
 
-                    let preis =
-                        item.preis * item.menge;
+                bereich.innerHTML =
+                    "<p>Fehler beim Laden der Bestellungen.</p>";
 
-                    gesamtpreis += preis;
+                return;
 
-                    html += `
-                        <p>
-                            ${item.menge}×
-                            ${item.name}
-                            –
-                            ${preis.toFixed(2)} €
-                        </p>
-                    `;
-                });
-
-                html += `
-                        <strong>
-                            Gesamt:
-                            ${gesamtpreis.toFixed(2)} €
-                        </strong>
-
-                    </div>
-                `;
             }
 
-            if (html === "") {
 
-                html =
+            if (!data || data.length === 0) {
+
+                bereich.innerHTML =
                     '<p class="leer">' +
                     'Noch keine Bestellungen gespeichert.' +
                     '</p>';
+
+                return;
+
             }
 
+
+            let bestellungenNachTisch = {};
+
+
+            data.forEach(bestellung => {
+
+                if (
+                    !bestellungenNachTisch[
+                        bestellung.tisch
+                    ]
+                ) {
+
+                    bestellungenNachTisch[
+                        bestellung.tisch
+                    ] = [];
+
+                }
+
+
+                bestellungenNachTisch[
+                    bestellung.tisch
+                ].push(bestellung);
+
+            });
+
+
+            let html = "";
+
+
+            for (
+                let tisch in bestellungenNachTisch
+            ) {
+
+                html += `
+
+                    <div class="tisch-bestellung">
+
+                        <h3>
+                            🪑 Tisch ${tisch}
+                        </h3>
+
+                `;
+
+
+                let gesamtpreis = 0;
+
+
+                bestellungenNachTisch[
+                    tisch
+                ].forEach(item => {
+
+                    let preis =
+                        Number(item.preis) *
+                        Number(item.menge);
+
+
+                    gesamtpreis += preis;
+
+
+                    html += `
+
+                        <p>
+
+                            ${item.menge}×
+
+                            ${item.artikel}
+
+                            –
+
+                            ${preis.toFixed(2)}
+                            €
+
+                        </p>
+
+                    `;
+
+                });
+
+
+                html += `
+
+                        <strong>
+
+                            Gesamt:
+                            ${gesamtpreis.toFixed(2)}
+                            €
+
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }
+
+
             bereich.innerHTML = html;
+
         }
 
+
+        // ==========================================
+        // BEIM START LADEN
+        // ==========================================
 
         anzeigen();
 
         gespeicherteBestellungenAnzeigen();
+
 
     </script>
 
