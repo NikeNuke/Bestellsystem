@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Restaurant Bestellsystem</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
+            max-width: 600px;
+            margin: auto;
             padding: 20px;
+            background: #f5f5f5;
         }
 
         h1 {
@@ -20,708 +23,413 @@
 
         .bereich {
             background: white;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             border-radius: 10px;
-        }
-
-        select {
-            padding: 10px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 8px 12px;
-            margin: 5px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
         }
 
         .gericht {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #ddd;
             padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
         .hinzufuegen {
-            background-color: #4caf50;
+            background: #4CAF50;
             color: white;
         }
 
-        .plus {
-            background-color: #4caf50;
-            color: white;
+        .plusminus {
+            background: #ddd;
+            margin: 0 3px;
         }
 
-        .minus {
-            background-color: #e53935;
-            color: white;
+        .bestellung {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
         }
 
         .absenden {
-            background-color: #1976d2;
-            color: white;
             width: 100%;
-            font-size: 16px;
-            padding: 12px;
-        }
-
-        .tisch-bestellung {
-            border: 1px solid #ccc;
             padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            background: #2196F3;
+            color: white;
+            font-size: 18px;
+            margin-top: 10px;
         }
 
-        .leer {
-            color: #777;
+        #status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🍽️ Restaurant</h1>
+    <h1>🍕 Restaurant Bestellsystem</h1>
 
-    <!-- TISCH AUSWÄHLEN -->
     <div class="bereich">
-
-        <h2>Tisch auswählen</h2>
+        <label for="tisch"><strong>Tisch auswählen:</strong></label>
 
         <select id="tisch">
-
-            <option value="">
-                -- Tisch auswählen --
-            </option>
-
             <option value="1">Tisch 1</option>
             <option value="2">Tisch 2</option>
             <option value="3">Tisch 3</option>
             <option value="4">Tisch 4</option>
             <option value="5">Tisch 5</option>
             <option value="6">Tisch 6</option>
-
         </select>
-
     </div>
 
 
-    <!-- SPEISEKARTE -->
     <div class="bereich">
 
         <h2>Speisekarte</h2>
 
         <div class="gericht">
-
-            <span>
-                Pizza Margherita – 9,50 €
-            </span>
-
-            <button
-                class="hinzufuegen"
+            <span>Pizza Margherita – 9,50 €</span>
+            <button class="hinzufuegen"
                 onclick="hinzufuegen('Pizza Margherita', 9.50)">
-
                 Hinzufügen
-
             </button>
-
         </div>
 
-
         <div class="gericht">
-
-            <span>
-                Pizza Salami – 10,50 €
-            </span>
-
-            <button
-                class="hinzufuegen"
+            <span>Pizza Salami – 10,50 €</span>
+            <button class="hinzufuegen"
                 onclick="hinzufuegen('Pizza Salami', 10.50)">
-
                 Hinzufügen
-
             </button>
-
         </div>
 
-
         <div class="gericht">
-
-            <span>
-                Spaghetti Bolognese – 11,50 €
-            </span>
-
-            <button
-                class="hinzufuegen"
+            <span>Spaghetti Bolognese – 11,50 €</span>
+            <button class="hinzufuegen"
                 onclick="hinzufuegen('Spaghetti Bolognese', 11.50)">
-
                 Hinzufügen
-
             </button>
-
         </div>
 
-
         <div class="gericht">
-
-            <span>
-                Cola – 3,00 €
-            </span>
-
-            <button
-                class="hinzufuegen"
+            <span>Cola – 3,00 €</span>
+            <button class="hinzufuegen"
                 onclick="hinzufuegen('Cola', 3.00)">
-
                 Hinzufügen
-
             </button>
-
         </div>
 
     </div>
 
 
-    <!-- AKTUELLE BESTELLUNG -->
     <div class="bereich">
 
         <h2>Aktuelle Bestellung</h2>
 
-        <div id="aktuelleBestellung">
-
-            Noch keine Artikel hinzugefügt.
-
+        <div id="bestellung">
+            Noch keine Artikel ausgewählt.
         </div>
 
-        <h3 id="gesamt">
-
-            Gesamt: 0,00 €
-
+        <h3>
+            Gesamt: <span id="gesamt">0.00</span> €
         </h3>
 
-
-        <button
-            class="absenden"
-            onclick="bestellungAbsenden()">
-
-            📤 Bestellung absenden
-
+        <button class="absenden" onclick="bestellungAbsenden()">
+            Bestellung absenden
         </button>
 
-    </div>
-
-
-    <!-- GESPEICHERTE BESTELLUNGEN -->
-    <div class="bereich">
-
-        <h2>
-            🗂️ Gespeicherte Bestellungen
-        </h2>
-
-        <div id="gespeicherteBestellungen">
-
-        </div>
+        <div id="status"></div>
 
     </div>
 
 
-    <!-- SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+// ==================================================
+// SUPABASE EINSTELLUNGEN
+// ==================================================
+
+// HIER deine Supabase Project URL eintragen
+const SUPABASE_URL = "https://vnvvivgdctdesvwnxlcj.supabase.co";
+
+// HIER deinen Publishable Key eintragen
+const SUPABASE_KEY = "sb_publishable_eKTZAEO03kD6EcMR6zckgg_lJ1gBCOy";
 
 
-    <script>
+// Supabase Verbindung herstellen
+let supabaseClient = null;
 
-        // ==========================================
-        // SUPABASE VERBINDUNG
-        // ==========================================
+try {
 
-        const SUPABASE_URL =
-            "https://vnvvivgdctdesvwnxlcj.supabase.co/rest/v1/";
+    if (
+        SUPABASE_URL !== "DEINE_SUPABASE_URL" &&
+        SUPABASE_KEY !== "DEIN_PUBLISHABLE_KEY"
+    ) {
 
-        const SUPABASE_KEY =
-            "sb_publishable_eKTZAEO03kD6EcMR6zckgg_lJ1gBCOy";
+        supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
 
+        console.log("Supabase wurde erfolgreich gestartet.");
 
-        const supabase =
-            window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
+    } else {
 
+        console.log("Supabase-Daten wurden noch nicht eingetragen.");
 
-        // ==========================================
-        // AKTUELLE BESTELLUNG
-        // ==========================================
+    }
 
-        let bestellung = [];
+} catch (fehler) {
 
+    console.error("Supabase Fehler:", fehler);
 
-        // ==========================================
-        // GERICHT HINZUFÜGEN
-        // ==========================================
-
-        function hinzufuegen(name, preis) {
-
-            let vorhandenesGericht =
-                bestellung.find(
-                    item => item.name === name
-                );
+}
 
 
-            if (vorhandenesGericht) {
+// ==================================================
+// BESTELLUNG
+// ==================================================
 
-                vorhandenesGericht.menge++;
-
-            } else {
-
-                bestellung.push({
-
-                    name: name,
-
-                    preis: preis,
-
-                    menge: 1
-
-                });
-
-            }
+let bestellung = [];
 
 
-            anzeigen();
+// Artikel hinzufügen
+function hinzufuegen(name, preis) {
 
+    const vorhandenerArtikel = bestellung.find(
+        artikel => artikel.name === name
+    );
+
+    if (vorhandenerArtikel) {
+
+        vorhandenerArtikel.menge++;
+
+    } else {
+
+        bestellung.push({
+            name: name,
+            preis: preis,
+            menge: 1
+        });
+
+    }
+
+    anzeigen();
+}
+
+
+// Menge erhöhen
+function plus(index) {
+
+    bestellung[index].menge++;
+
+    anzeigen();
+}
+
+
+// Menge verringern
+function minus(index) {
+
+    bestellung[index].menge--;
+
+    if (bestellung[index].menge <= 0) {
+
+        bestellung.splice(index, 1);
+
+    }
+
+    anzeigen();
+}
+
+
+// Bestellung anzeigen
+function anzeigen() {
+
+    const container = document.getElementById("bestellung");
+
+    container.innerHTML = "";
+
+    if (bestellung.length === 0) {
+
+        container.innerHTML = "Noch keine Artikel ausgewählt.";
+
+        document.getElementById("gesamt").textContent = "0.00";
+
+        return;
+    }
+
+
+    let gesamt = 0;
+
+
+    bestellung.forEach((artikel, index) => {
+
+        const zeile = document.createElement("div");
+
+        zeile.className = "bestellung";
+
+
+        const einzelpreis =
+            artikel.preis * artikel.menge;
+
+        gesamt += einzelpreis;
+
+
+        zeile.innerHTML = `
+            <span>
+                ${artikel.name}
+                (${artikel.preis.toFixed(2)} €)
+            </span>
+
+            <span>
+
+                <button class="plusminus"
+                    onclick="minus(${index})">
+                    −
+                </button>
+
+                ${artikel.menge}
+
+                <button class="plusminus"
+                    onclick="plus(${index})">
+                    +
+                </button>
+
+            </span>
+        `;
+
+
+        container.appendChild(zeile);
+
+    });
+
+
+    document.getElementById("gesamt").textContent =
+        gesamt.toFixed(2);
+
+}
+
+
+// ==================================================
+// BESTELLUNG AN SUPABASE SENDEN
+// ==================================================
+
+async function bestellungAbsenden() {
+
+    const status = document.getElementById("status");
+
+
+    // Prüfen, ob Artikel vorhanden sind
+    if (bestellung.length === 0) {
+
+        alert("Bitte zuerst mindestens einen Artikel auswählen.");
+
+        return;
+    }
+
+
+    // Tisch auslesen
+    const tisch =
+        parseInt(document.getElementById("tisch").value);
+
+
+    // Prüfen, ob Supabase eingerichtet ist
+    if (!supabaseClient) {
+
+        status.innerHTML =
+            "❌ Supabase ist noch nicht eingerichtet.";
+
+        status.style.background = "#ffdddd";
+
+        return;
+    }
+
+
+    status.innerHTML = "⏳ Bestellung wird gespeichert...";
+    status.style.background = "#fff3cd";
+
+
+    try {
+
+        // Für jeden Artikel einen Datensatz erstellen
+        const daten = bestellung.map(artikel => ({
+
+            tisch: tisch,
+
+            artikel: artikel.name,
+
+            menge: artikel.menge,
+
+            preis: artikel.preis
+
+        }));
+
+
+        // Daten an Supabase senden
+        const { data, error } =
+            await supabaseClient
+                .from("Bestellungen")
+                .insert(daten);
+
+
+        // Fehler überprüfen
+        if (error) {
+
+            console.error("Supabase Fehler:", error);
+
+            status.innerHTML =
+                "❌ Fehler beim Speichern: " +
+                error.message;
+
+            status.style.background = "#ffdddd";
+
+            return;
         }
 
 
-        // ==========================================
-        // MENGE ERHÖHEN
-        // ==========================================
+        // Erfolg
+        status.innerHTML =
+            "✅ Bestellung wurde erfolgreich gespeichert!";
 
-        function plus(name) {
+        status.style.background = "#ddffdd";
 
-            let gericht =
-                bestellung.find(
-                    item => item.name === name
-                );
 
-
-            if (gericht) {
-
-                gericht.menge++;
-
-            }
-
-
-            anzeigen();
-
-        }
-
-
-        // ==========================================
-        // MENGE VERRINGERN
-        // ==========================================
-
-        function minus(name) {
-
-            let gericht =
-                bestellung.find(
-                    item => item.name === name
-                );
-
-
-            if (!gericht) {
-
-                return;
-
-            }
-
-
-            gericht.menge--;
-
-
-            if (gericht.menge <= 0) {
-
-                bestellung =
-                    bestellung.filter(
-                        item => item.name !== name
-                    );
-
-            }
-
-
-            anzeigen();
-
-        }
-
-
-        // ==========================================
-        // AKTUELLE BESTELLUNG ANZEIGEN
-        // ==========================================
-
-        function anzeigen() {
-
-            let bereich =
-                document.getElementById(
-                    "aktuelleBestellung"
-                );
-
-
-            let gesamtElement =
-                document.getElementById(
-                    "gesamt"
-                );
-
-
-            if (bestellung.length === 0) {
-
-                bereich.innerHTML =
-                    "Noch keine Artikel hinzugefügt.";
-
-
-                gesamtElement.innerHTML =
-                    "Gesamt: 0,00 €";
-
-
-                return;
-
-            }
-
-
-            let html = "";
-
-            let gesamtpreis = 0;
-
-
-            bestellung.forEach(item => {
-
-                let artikelPreis =
-                    item.preis * item.menge;
-
-
-                gesamtpreis += artikelPreis;
-
-
-                html += `
-
-                    <div class="gericht">
-
-                        <span>
-
-                            ${item.name}
-
-                            –
-
-                            ${item.preis.toFixed(2)}
-                            €
-
-                            ×
-
-                            ${item.menge}
-
-                            =
-
-                            ${artikelPreis.toFixed(2)}
-                            €
-
-                        </span>
-
-
-                        <div>
-
-                            <button
-                                class="minus"
-                                onclick="minus('${item.name}')">
-
-                                −
-
-                            </button>
-
-
-                            <button
-                                class="plus"
-                                onclick="plus('${item.name}')">
-
-                                +
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            });
-
-
-            bereich.innerHTML = html;
-
-
-            gesamtElement.innerHTML =
-                "Gesamt: " +
-                gesamtpreis.toFixed(2) +
-                " €";
-
-        }
-
-
-        // ==========================================
-        // BESTELLUNG AN SUPABASE SENDEN
-        // ==========================================
-
-        async function bestellungAbsenden() {
-
-            let tisch =
-                document.getElementById(
-                    "tisch"
-                ).value;
-
-
-            if (tisch === "") {
-
-                alert(
-                    "Bitte zuerst einen Tisch auswählen!"
-                );
-
-                return;
-
-            }
-
-
-            if (bestellung.length === 0) {
-
-                alert(
-                    "Die Bestellung ist leer!"
-                );
-
-                return;
-
-            }
-
-
-            // Jedes Gericht speichern
-
-            for (let item of bestellung) {
-
-                const { error } =
-                    await supabase
-
-                        .from("bestellungen")
-
-                        .insert({
-
-                            tisch:
-                                Number(tisch),
-
-                            artikel:
-                                item.name,
-
-                            menge:
-                                item.menge,
-
-                            preis:
-                                item.preis
-
-                        });
-
-
-                if (error) {
-
-                    console.error(error);
-
-
-                    alert(
-                        "Fehler beim Speichern der Bestellung!"
-                    );
-
-
-                    return;
-
-                }
-
-            }
-
-
-            alert(
-                "Bestellung für Tisch " +
-                tisch +
-                " wurde gespeichert!"
-            );
-
-
-            bestellung = [];
-
-
-            anzeigen();
-
-
-            gespeicherteBestellungenAnzeigen();
-
-        }
-
-
-        // ==========================================
-        // BESTELLUNGEN AUS SUPABASE LADEN
-        // ==========================================
-
-        async function gespeicherteBestellungenAnzeigen() {
-
-            let bereich =
-                document.getElementById(
-                    "gespeicherteBestellungen"
-                );
-
-
-            const { data, error } =
-                await supabase
-
-                    .from("bestellungen")
-
-                    .select("*")
-
-                    .order(
-                        "erstellt_am",
-                        {
-                            ascending: false
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(error);
-
-                bereich.innerHTML =
-                    "<p>Fehler beim Laden der Bestellungen.</p>";
-
-                return;
-
-            }
-
-
-            if (!data || data.length === 0) {
-
-                bereich.innerHTML =
-                    '<p class="leer">' +
-                    'Noch keine Bestellungen gespeichert.' +
-                    '</p>';
-
-                return;
-
-            }
-
-
-            let bestellungenNachTisch = {};
-
-
-            data.forEach(bestellung => {
-
-                if (
-                    !bestellungenNachTisch[
-                        bestellung.tisch
-                    ]
-                ) {
-
-                    bestellungenNachTisch[
-                        bestellung.tisch
-                    ] = [];
-
-                }
-
-
-                bestellungenNachTisch[
-                    bestellung.tisch
-                ].push(bestellung);
-
-            });
-
-
-            let html = "";
-
-
-            for (
-                let tisch in bestellungenNachTisch
-            ) {
-
-                html += `
-
-                    <div class="tisch-bestellung">
-
-                        <h3>
-                            🪑 Tisch ${tisch}
-                        </h3>
-
-                `;
-
-
-                let gesamtpreis = 0;
-
-
-                bestellungenNachTisch[
-                    tisch
-                ].forEach(item => {
-
-                    let preis =
-                        Number(item.preis) *
-                        Number(item.menge);
-
-
-                    gesamtpreis += preis;
-
-
-                    html += `
-
-                        <p>
-
-                            ${item.menge}×
-
-                            ${item.artikel}
-
-                            –
-
-                            ${preis.toFixed(2)}
-                            €
-
-                        </p>
-
-                    `;
-
-                });
-
-
-                html += `
-
-                        <strong>
-
-                            Gesamt:
-                            ${gesamtpreis.toFixed(2)}
-                            €
-
-                        </strong>
-
-                    </div>
-
-                `;
-
-            }
-
-
-            bereich.innerHTML = html;
-
-        }
-
-
-        // ==========================================
-        // BEIM START LADEN
-        // ==========================================
+        // Bestellung leeren
+        bestellung = [];
 
         anzeigen();
 
-        gespeicherteBestellungenAnzeigen();
+
+    } catch (fehler) {
+
+        console.error("Fehler:", fehler);
+
+        status.innerHTML =
+            "❌ Es ist ein Fehler aufgetreten.";
+
+        status.style.background = "#ffdddd";
+
+    }
+
+}
 
 
-    </script>
+// Startanzeige
+anzeigen();
+
+</script>
 
 </body>
 </html>
