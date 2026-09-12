@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Restaurant Bestellsystem</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .bereich {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .gericht {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .hinzufuegen {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .plus {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .minus {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .absenden {
+            background-color: #1976d2;
+            color: white;
+            width: 100%;
+            font-size: 16px;
+            padding: 12px;
+        }
+
+        .tisch-bestellung {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .leer {
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🍽️ Restaurant</h1>
+
+    <div class="bereich">
+        <h2>Tisch auswählen</h2>
+
+        <select id="tisch">
+            <option value="">-- Tisch auswählen --</option>
+            <option value="1">Tisch 1</option>
+            <option value="2">Tisch 2</option>
+            <option value="3">Tisch 3</option>
+            <option value="4">Tisch 4</option>
+            <option value="5">Tisch 5</option>
+            <option value="6">Tisch 6</option>
+        </select>
+    </div>
+
+    <div class="bereich">
+
+        <h2>Speisekarte</h2>
+
+        <div class="gericht">
+            <span>Pizza Margherita – 9,50 €</span>
+            <button class="hinzufuegen"
+                onclick="hinzufuegen('Pizza Margherita', 9.50)">
+                Hinzufügen
+            </button>
+        </div>
+
+        <div class="gericht">
+            <span>Pizza Salami – 10,50 €</span>
+            <button class="hinzufuegen"
+                onclick="hinzufuegen('Pizza Salami', 10.50)">
+                Hinzufügen
+            </button>
+        </div>
+
+        <div class="gericht">
+            <span>Spaghetti Bolognese – 11,50 €</span>
+            <button class="hinzufuegen"
+                onclick="hinzufuegen('Spaghetti Bolognese', 11.50)">
+                Hinzufügen
+            </button>
+        </div>
+
+        <div class="gericht">
+            <span>Cola – 3,00 €</span>
+            <button class="hinzufuegen"
+                onclick="hinzufuegen('Cola', 3.00)">
+                Hinzufügen
+            </button>
+        </div>
+
+    </div>
+
+    <div class="bereich">
+
+        <h2>Aktuelle Bestellung</h2>
+
+        <div id="aktuelleBestellung">
+            Noch keine Artikel hinzugefügt.
+        </div>
+
+        <h3 id="gesamt">
+            Gesamt: 0,00 €
+        </h3>
+
+        <button class="absenden" onclick="bestellungAbsenden()">
+            📤 Bestellung absenden
+        </button>
+
+    </div>
+
+    <div class="bereich">
+
+        <h2>🗂️ Gespeicherte Bestellungen</h2>
+
+        <div id="gespeicherteBestellungen"></div>
+
+    </div>
+
+    <script>
+
+        let bestellung = [];
+
+        let bestellungen =
+            JSON.parse(localStorage.getItem("bestellungen")) || {};
+
+        function hinzufuegen(name, preis) {
+
+            let vorhandenesGericht =
+                bestellung.find(item => item.name === name);
+
+            if (vorhandenesGericht) {
+
+                vorhandenesGericht.menge++;
+
+            } else {
+
+                bestellung.push({
+                    name: name,
+                    preis: preis,
+                    menge: 1
+                });
+            }
+
+            anzeigen();
+        }
+
+
+        function plus(name) {
+
+            let gericht =
+                bestellung.find(item => item.name === name);
+
+            if (gericht) {
+                gericht.menge++;
+            }
+
+            anzeigen();
+        }
+
+
+        function minus(name) {
+
+            let gericht =
+                bestellung.find(item => item.name === name);
+
+            if (!gericht) {
+                return;
+            }
+
+            gericht.menge--;
+
+            if (gericht.menge <= 0) {
+
+                bestellung =
+                    bestellung.filter(item => item.name !== name);
+            }
+
+            anzeigen();
+        }
+
+
+        function anzeigen() {
+
+            let bereich =
+                document.getElementById("aktuelleBestellung");
+
+            let gesamtElement =
+                document.getElementById("gesamt");
+
+            if (bestellung.length === 0) {
+
+                bereich.innerHTML =
+                    "Noch keine Artikel hinzugefügt.";
+
+                gesamtElement.innerHTML =
+                    "Gesamt: 0,00 €";
+
+                return;
+            }
+
+            let html = "";
+            let gesamtpreis = 0;
+
+            bestellung.forEach(item => {
+
+                let artikelPreis =
+                    item.preis * item.menge;
+
+                gesamtpreis += artikelPreis;
+
+                html += `
+                    <div class="gericht">
+
+                        <span>
+                            ${item.name}
+                            – ${item.preis.toFixed(2)} €
+                            × ${item.menge}
+                            =
+                            ${artikelPreis.toFixed(2)} €
+                        </span>
+
+                        <div>
+
+                            <button
+                                class="minus"
+                                onclick="minus('${item.name}')">
+                                −
+                            </button>
+
+                            <button
+                                class="plus"
+                                onclick="plus('${item.name}')">
+                                +
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+
+            bereich.innerHTML = html;
+
+            gesamtElement.innerHTML =
+                "Gesamt: " + gesamtpreis.toFixed(2) + " €";
+        }
+
+
+        function bestellungAbsenden() {
+
+            let tisch =
+                document.getElementById("tisch").value;
+
+            if (tisch === "") {
+
+                alert(
+                    "Bitte zuerst einen Tisch auswählen!"
+                );
+
+                return;
+            }
+
+            if (bestellung.length === 0) {
+
+                alert(
+                    "Die Bestellung ist leer!"
+                );
+
+                return;
+            }
+
+            bestellungen[tisch] = {
+
+                artikel: bestellung,
+
+                zeit:
+                    new Date().toLocaleTimeString("de-DE")
+            };
+
+            localStorage.setItem(
+                "bestellungen",
+                JSON.stringify(bestellungen)
+            );
+
+            alert(
+                "Bestellung für Tisch " +
+                tisch +
+                " wurde gespeichert!"
+            );
+
+            bestellung = [];
+
+            anzeigen();
+
+            gespeicherteBestellungenAnzeigen();
+        }
+
+
+        function gespeicherteBestellungenAnzeigen() {
+
+            let bereich =
+                document.getElementById(
+                    "gespeicherteBestellungen"
+                );
+
+            let html = "";
+
+            for (let tisch in bestellungen) {
+
+                let bestellung =
+                    bestellungen[tisch];
+
+                let gesamtpreis = 0;
+
+                html += `
+                    <div class="tisch-bestellung">
+
+                        <h3>🪑 Tisch ${tisch}</h3>
+
+                        <p>
+                            Gesendet um:
+                            ${bestellung.zeit}
+                        </p>
+                `;
+
+                bestellung.artikel.forEach(item => {
+
+                    let preis =
+                        item.preis * item.menge;
+
+                    gesamtpreis += preis;
+
+                    html += `
+                        <p>
+                            ${item.menge}×
+                            ${item.name}
+                            –
+                            ${preis.toFixed(2)} €
+                        </p>
+                    `;
+                });
+
+                html += `
+                        <strong>
+                            Gesamt:
+                            ${gesamtpreis.toFixed(2)} €
+                        </strong>
+
+                    </div>
+                `;
+            }
+
+            if (html === "") {
+
+                html =
+                    '<p class="leer">' +
+                    'Noch keine Bestellungen gespeichert.' +
+                    '</p>';
+            }
+
+            bereich.innerHTML = html;
+        }
+
+
+        anzeigen();
+
+        gespeicherteBestellungenAnzeigen();
+
+    </script>
+
+</body>
+</html>
